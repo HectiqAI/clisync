@@ -20,6 +20,8 @@ This package is used to create a command line tool from a module. The command li
 
 It is intended for a specific use case with singleton classes. The static methods of the class are included in the command line tool.
 
+A working and complete demo is available in the [demo](demo) directory. A readme file is available to explain how to install and use the demo.
+
 ### Include all class methods
 
 ```python
@@ -68,9 +70,9 @@ The distribution on done with continuous integration using github actions. The s
 
 Then, to trigger the release, we need to create a tag with the version number. The release will be automatically created and the package will be uploaded to pypi.
 
-For example, to release version 1.0, we need to do the following:
+For example, to release version 1.0.0, we need to do the following:
 
 ```bash
-git tag 1.0
-git push origin 1.0
+git tag v1.0.0
+git push origin v1.0.0
 ``` 
