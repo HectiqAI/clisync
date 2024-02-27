@@ -66,6 +66,8 @@ cli = CliSync(module='my_module', cls='Object')
 
 ## Distribution on pypi
 
+> Make sure the version number is updated in the [__init__.py](clisync/__init__.py) file and in the [setup.py](setup.py) file.
+
 The distribution on done with continuous integration using github actions. The secret `PYPI_API_TOKEN` is set in the repository settings.
 
 Then, to trigger the release, we need to create a tag with the version number. The release will be automatically created and the package will be uploaded to pypi.
@@ -76,3 +78,5 @@ For example, to release version 1.0.0, we need to do the following:
 git tag v1.0.0
 git push origin v1.0.0
 ``` 
+
+You can also create a release with a new tag in the github interface.
