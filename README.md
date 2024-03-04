@@ -8,6 +8,7 @@ A python package to sync module and command line tools.
     - [Include all class methods](#include-all-class-methods)
     - [Specify the method to include](#specify-the-method-to-include)
   - [Distribution on pypi](#distribution-on-pypi)
+  - [Changelog](#changelog)
 
 ## Installation
 
@@ -80,3 +81,8 @@ git push origin v1.0.0
 ``` 
 
 You can also create a release with a new tag in the github interface.
+
+## Changelog
+
+- 1.1.0: Add the possibility to exclude methods from the command line tool using the decorator `@clisync.exclude()`.
+- 1.0.0: Initial release

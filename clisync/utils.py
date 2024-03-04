@@ -130,6 +130,9 @@ def list_static_method(cls: type, requires_decorator: bool) -> List[str]:
         if v.__class__ != staticmethod:
             continue
         method = getattr(cls, k)
+        if hasattr(method, "_clisync"):
+            if method._clisync is False:
+                continue
         if requires_decorator:
             if (not hasattr(method, "_clisync") or
                     getattr(method, "_clisync") is False):

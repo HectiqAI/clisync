@@ -1,4 +1,4 @@
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 import click
 from typing import List, Union, Optional
@@ -19,6 +19,16 @@ def include():
 
     return _exposed_method
 
+def exclude():
+    def _exposed_method(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            return f(*args, **kwargs)
+
+        wrapper._clisync = False
+        return wrapper
+
+    return _exposed_method
 
 class CliSync(click.MultiCommand):
     """Create a group of click commands from a module and a list of classes.
