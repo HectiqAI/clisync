@@ -1,12 +1,14 @@
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 import click
 from typing import List, Union, Optional
 import importlib
 
 from clisync.utils import list_static_method, cli_callback, cli_doc
+from clisync.shell import setup_autocomplete
 
 from functools import wraps
+
 
 def include():
     def _exposed_method(f):
@@ -19,6 +21,7 @@ def include():
 
     return _exposed_method
 
+
 def exclude():
     def _exposed_method(f):
         @wraps(f)
@@ -30,6 +33,7 @@ def exclude():
 
     return _exposed_method
 
+
 class CliSync(click.MultiCommand):
     """Create a group of click commands from a module and a list of classes.
 
@@ -40,29 +44,23 @@ class CliSync(click.MultiCommand):
     group = CliSync(module="hectiq_lab", classes=["Run", "Project"])
     ```
     """
-    def __init__(self, 
-                 module: Union[str, type], 
-                 classes: List[str],
-                 requires_decorator: bool = True,
-                 **kwargs):
+
+    def __init__(self, module: Union[str, type], classes: List[str], requires_decorator: bool = True, **kwargs):
         super().__init__(**kwargs)
         self.requires_decorator = requires_decorator
         self.module = importlib.import_module(module) if isinstance(module, str) else module
         self.classes = classes
 
     def list_commands(self, ctx):
-        """Required method for click.MultiCommand.
-        """
+        """Required method for click.MultiCommand."""
         rv = []
         for cls in self.classes:
             cls = getattr(self.module, cls)
-            rv += list_static_method(cls, 
-                                     requires_decorator=self.requires_decorator)
+            rv += list_static_method(cls, requires_decorator=self.requires_decorator)
         return rv
 
     def get_command(self, ctx, name):
-        """Required method for click.MultiCommand.
-        """
+        """Required method for click.MultiCommand."""
         cls, name = name.split(".")
         cls = getattr(self.module, cls)
         method = getattr(cls, name)
