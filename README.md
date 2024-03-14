@@ -84,5 +84,6 @@ You can also create a release with a new tag in the github interface.
 
 ## Changelog
 
+- 1.2.0: Add the set up script for auto-complete using the `setup_autocomplete` function.
 - 1.1.0: Add the possibility to exclude methods from the command line tool using the decorator `@clisync.exclude()`.
 - 1.0.0: Initial release
