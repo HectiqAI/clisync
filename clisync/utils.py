@@ -38,7 +38,6 @@ def get_params_from_docstring(docstring: str) -> dict:
             continue
         # If the line has a format of "param: description", or "param (type): description", extract the
         # param and description using a regex
-        # print(a.strip())
         match = re.match(r"(\w+)\s*\((.*?)\):\s*(.*)", a.strip())
         if match:
             param, param_type, description = match.groups()
