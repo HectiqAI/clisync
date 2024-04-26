@@ -43,7 +43,7 @@ def get_params_from_docstring(docstring: str) -> dict:
             param, param_type, description = match.groups()
             param = param.strip()
             if param_type:
-                params[param] = f"{description.strip()} (type: {param_type if param_type != 'bool' else 'flag'})"
+                params[param] = f"({param_type if param_type != 'bool' else 'flag'}) {description.strip()}"
             else:
                 params[param] = description.strip()
     return params
