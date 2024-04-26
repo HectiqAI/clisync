@@ -1,6 +1,7 @@
 import click
-from typing import List
+from typing import List, get_type_hints
 import re
+
 
 def get_method_description(method: callable):
     """Get the first line of the method docstring as the description.
@@ -16,6 +17,7 @@ def get_method_description(method: callable):
         if len(r) > 0:
             return r.strip()
     return ""
+
 
 def get_params_from_docstring(docstring: str) -> dict:
     """Get the parameters and their descriptions from the method docstring.
@@ -34,14 +36,15 @@ def get_params_from_docstring(docstring: str) -> dict:
     for a in docstring.split("\n"):
         if len(a.split(":")) <= 1:
             continue
-        # If the line has a format of "param: description", or "param (type): description", extract the 
+        # If the line has a format of "param: description", or "param (type): description", extract the
         # param and description using a regex
-        match = re.match(r"(\w+)\s*\((\w+)\):\s*(.*)", a.strip())
+        # print(a.strip())
+        match = re.match(r"(\w+)\s*\((.*?)\):\s*(.*)", a.strip())
         if match:
             param, param_type, description = match.groups()
             param = param.strip()
             if param_type:
-                params[param] = f"{description.strip()} (type: {param_type})"
+                params[param] = f"{description.strip()} (type: {param_type if param_type != 'bool' else 'flag'})"
             else:
                 params[param] = description.strip()
     return params
@@ -60,12 +63,13 @@ def cli_doc(method: callable):
     params = []
     helps = get_method_description(method)
     param_docs = get_params_from_docstring(method.__doc__)
-    return_in_annots = "return" in method.__annotations__
-    for idx, (key, value) in enumerate(method.__annotations__.items()):
-        if key == "return":
+    annotations = get_type_hints(method)
+    return_in_annots = "return" in annotations
+    for idx, (key, value) in enumerate(annotations.items()):
+        if key == "return" or key in method._overriden_kwargs:
             continue
         default_value = None
-        di = len(method.__annotations__) - len(method.__defaults__ or []) - int(return_in_annots)
+        di = len(annotations) - len(method.__defaults__ or []) - int(return_in_annots)
         if method.__defaults__ and len(method.__defaults__) > 0 and idx >= di:
             default_value = method.__defaults__[idx - di]
         multiple = False
@@ -100,10 +104,11 @@ def cli_callback(cls: type, method: str) -> callable:
     Args:
         cls (type): The class of the method.
         method (str): The name of the method.
-    
+
     Returns:
         callable: A callback function for the click command.
     """
+
     def callback(**kwargs):
         for key, value in kwargs.items():
             # Convert the tuples of tuple to dict.
@@ -134,8 +139,7 @@ def list_static_method(cls: type, requires_decorator: bool) -> List[str]:
             if method._clisync is False:
                 continue
         if requires_decorator:
-            if (not hasattr(method, "_clisync") or
-                    getattr(method, "_clisync") is False):
+            if not hasattr(method, "_clisync") or getattr(method, "_clisync") is False:
                 continue
         rv.append(cls.__name__ + "." + k)
     rv.sort()

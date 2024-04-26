@@ -1,22 +1,23 @@
 __version__ = "1.2.0"
 
 import click
-from typing import List, Union, Optional
+from typing import List, Union
 import importlib
 
 from clisync.utils import list_static_method, cli_callback, cli_doc
-from clisync.shell import setup_autocomplete
 
 from functools import wraps
 
 
-def include():
+def include(**override_kwargs):
     def _exposed_method(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
+            kwargs.update(override_kwargs)
             return f(*args, **kwargs)
 
         wrapper._clisync = True
+        wrapper._overriden_kwargs = override_kwargs
         return wrapper
 
     return _exposed_method
