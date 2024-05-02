@@ -1,5 +1,6 @@
+from typing import List, get_type_hints, Union
+import importlib
 import click
-from typing import List, get_type_hints
 import re
 
 
@@ -83,7 +84,8 @@ def cli_doc(method: callable):
         if str(value).startswith("typing.List"):
             value = list
             multiple = True
-
+        if value == bool:
+            default_value = False
         param = click.Option(
             [f"--{key}"],
             default=default_value,
@@ -92,9 +94,10 @@ def cli_doc(method: callable):
             multiple=multiple,
             help=param_docs.get(key, f""),
             show_default=True,
+            is_flag=value == bool,
         )
         params.append(param)
-    return helps, params
+    return helps, list(reversed(params))
 
 
 def cli_callback(cls: type, method: str) -> callable:
