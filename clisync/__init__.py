@@ -46,24 +46,25 @@ class CliSync(click.MultiCommand):
     ```
     """
 
-    def __init__(self, module: Union[str, type], classes: List[str], requires_decorator: bool = True, **kwargs):
+    def __init__(
+        self, module: Union[str, type], classes: List[Union[str, type]], requires_decorator: bool = True, **kwargs
+    ):
         super().__init__(**kwargs)
         self.requires_decorator = requires_decorator
         self.module = importlib.import_module(module) if isinstance(module, str) else module
-        self.classes = classes
+        self.classes = [getattr(self.module, c) if isinstance(c, str) else c for c in classes]
 
     def list_commands(self, ctx):
         """Required method for click.MultiCommand."""
         rv = []
         for cls in self.classes:
-            cls = getattr(self.module, cls)
             rv += list_static_method(cls, requires_decorator=self.requires_decorator)
         return rv
 
     def get_command(self, ctx, name):
         """Required method for click.MultiCommand."""
         cls, name = name.split(".")
-        cls = getattr(self.module, cls)
+        cls = list(filter(lambda c: c.__name__ == cls, self.classes))[0]
         method = getattr(cls, name)
         helps, params = cli_doc(method)
         # In later versions of click, this is necessary as `params` cannot be used in `click.command`.
