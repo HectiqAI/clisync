@@ -66,7 +66,7 @@ def cli_doc(method: callable):
     annotations = get_type_hints(method)
     return_in_annots = "return" in annotations
     for idx, (key, value) in enumerate(annotations.items()):
-        if key == "return" or key in method._overriden_kwargs:
+        if key == "return" or (hasattr(method,"_overriden_kwargs") and (key in method._overriden_kwargs)):
             continue
         default_value = None
         di = len(annotations) - len(method.__defaults__ or []) - int(return_in_annots)
