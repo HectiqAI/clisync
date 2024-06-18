@@ -64,13 +64,17 @@ def cli_doc(method: callable):
     param_docs = get_params_from_docstring(method.__doc__)
     annotations = get_type_hints(method)
     return_in_annots = "return" in annotations
+    overriden_kwargs = getattr(method, "_overriden_kwargs", {})
     for idx, (key, value) in enumerate(annotations.items()):
-        if key == "return" or (hasattr(method, "_overriden_kwargs") and key in method._overriden_kwargs):
+        if key == "return":
             continue
         default_value = None
-        di = len(annotations) - len(method.__defaults__ or []) - int(return_in_annots)
-        if method.__defaults__ and len(method.__defaults__) > 0 and idx >= di:
-            default_value = method.__defaults__[idx - di]
+        if key in overriden_kwargs:
+            default_value = overriden_kwargs[key]
+        else:
+            di = len(annotations) - len(method.__defaults__ or []) - int(return_in_annots)
+            if method.__defaults__ and len(method.__defaults__) > 0 and idx >= di:
+                default_value = method.__defaults__[idx - di]
         multiple = False
         if str(value).startswith("typing.Optional"):
             value = value.__args__[0]
@@ -98,8 +102,7 @@ def cli_doc(method: callable):
         params.append(param)
     return helps, list(reversed(params))
 
-
-def cli_callback(cls: type, method: str) -> callable:
+def cli_callback(cls: type, method: callable) -> callable:
     """Create a callback function for a click command.
 
     Args:

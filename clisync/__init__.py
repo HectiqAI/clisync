@@ -1,7 +1,7 @@
-__version__ = "1.3.1"
+__version__ = "1.3.2"
 
 import click
-from typing import List, Union
+from typing import List, Union, Optional
 import importlib
 
 from clisync.utils import list_static_method, cli_callback, cli_doc
@@ -13,7 +13,6 @@ def include(**override_kwargs):
     def _exposed_method(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
-            kwargs.update(override_kwargs)
             return f(*args, **kwargs)
 
         wrapper._clisync = True
@@ -44,10 +43,20 @@ class CliSync(click.MultiCommand):
     from clisync import CliSync
     group = CliSync(module="hectiq_lab", classes=["Run", "Project"])
     ```
+    Or use imported classes:
+    ```
+    from clisync import CliSync
+    from hectiq_lab import Run, Project
+    group = CliSync(classes=[Run, Project])
+    ```
+
+    
     """
 
     def __init__(
-        self, module: Union[str, type], classes: List[Union[str, type]], requires_decorator: bool = True, **kwargs
+        self, classes: List[Union[str, type]], 
+        module: Optional[Union[str, type]], 
+        requires_decorator: bool = True, **kwargs
     ):
         super().__init__(**kwargs)
         self.requires_decorator = requires_decorator
@@ -64,7 +73,10 @@ class CliSync(click.MultiCommand):
     def get_command(self, ctx, name):
         """Required method for click.MultiCommand."""
         cls, name = name.split(".")
-        cls = list(filter(lambda c: c.__name__ == cls, self.classes))[0]
+        cls = list(filter(lambda c: c.__name__ == cls, self.classes))
+        if not cls:
+            return None
+        cls = cls[0]
         method = getattr(cls, name)
         helps, params = cli_doc(method)
         # In later versions of click, this is necessary as `params` cannot be used in `click.command`.

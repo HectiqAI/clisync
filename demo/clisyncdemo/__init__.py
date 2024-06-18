@@ -6,14 +6,16 @@ from clisync import CliSync
 
 
 def main():
-    group = CliSync(classes=['Object'], 
-                    module='clisyncdemo.objects', 
-                    requires_decorator=False)
-    controlled_group = CliSync(classes=['ObjectControlled'],
-                                module='clisyncdemo.objects'
-                               )
+    import clisyncdemo
+    from clisyncdemo.objects import ObjectControlled, Object
+    group = CliSync(classes=[ObjectControlled], 
+                    module=clisyncdemo)
 
-    cli = click.CommandCollection(sources=[group, controlled_group])
+    uncontrolled_group = CliSync(classes=[Object], 
+                    module=clisyncdemo,
+                    requires_decorator=False)
+
+    cli = click.CommandCollection(sources=[group, uncontrolled_group])
     # Standalone mode is False so that the errors can be caught by the runs
     cli(standalone_mode=False)
     sys.exit()
